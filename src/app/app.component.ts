@@ -1,36 +1,70 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterOutlet } from '@angular/router';
+import { AsyncPipe, CommonModule, NgFor, NgIf } from '@angular/common';
+import { Component, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { Observable } from 'rxjs';
+import { PokemonService } from './core/service/pokemon.service';
+import { SpinnerComponent } from './spinner/spinner.component';
 
 @Component({
   selector: 'io-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet],
+  imports: [
+    AsyncPipe,
+    CommonModule,
+    MatButtonModule,
+    MatProgressBarModule,
+    NgFor,
+    NgIf,
+    SpinnerComponent,
+  ],
   template: `
-    <!--The content below is only a placeholder and can be replaced.-->
-    <div style="text-align:center" class="content">
-      <h1>
-        Welcome to {{title}}!
-      </h1>
-      <span style="display: block">{{ title }} app is running!</span>
-      <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
+    <io-spinner></io-spinner>
+
+    <div class="container">
+      <button mat-raised-button (click)="addPokemon(1)">
+        ¡Bulbasaur yo te elijo!
+      </button>
+      <button mat-raised-button (click)="addPokemon(4)">
+        ¡Charmander yo te elijo!
+      </button>
+      <button mat-raised-button (click)="addPokemon(7)">
+        ¡Squirtle yo te elijo!
+      </button>
+
+      <ng-container *ngFor="let pokemon$ of pokemons">
+        <img
+          *ngIf="pokemon$ | async as pokemon"
+          [src]="pokemon"
+          alt="Imágen de un pokémon"
+        />
+      </ng-container>
     </div>
-    <h2>Here are some links to help you start: </h2>
-    <ul>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://angular.io/cli">CLI Documentation</a></h2>
-      </li>
-      <li>
-        <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-      </li>
-    </ul>
-    <router-outlet></router-outlet>
   `,
-  styles: [],
+  styles: [
+    `
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 15px;
+
+        button {
+          width: 300px;
+          max-width: 100%;
+        }
+      }
+    `,
+  ],
 })
 export class AppComponent {
-  title = 'signals-completed';
+  pokemons: Observable<unknown>[] = [];
+
+  private pokeService = inject(PokemonService);
+
+  addPokemon(pokeNumber: number): void {
+    const pokemon$ = this.pokeService.getPokemonImage(pokeNumber);
+    this.pokemons = [...this.pokemons, pokemon$];
+  }
 }
