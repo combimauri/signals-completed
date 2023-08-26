@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, map, tap } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -9,6 +9,7 @@ export class SubjectLoadingState {
 
   loading$ = this.loadRequests$.pipe(
     map((loadRequests) => loadRequests > 0),
+    distinctUntilChanged(),
     tap((loading) => console.log('Loading:', loading))
   );
 
